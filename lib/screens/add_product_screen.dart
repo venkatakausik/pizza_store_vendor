@@ -57,6 +57,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
   List<TextFormField> _toppingsNameFields = [];
   List<TextEditingController> _toppingsPriceControllers = [];
   List<TextFormField> _toppingsPriceFields = [];
+  List<TextEditingController> _toppingsExtraPriceControllers = [];
+  List<TextFormField> _toppingsExtraPriceFields = [];
 
   Widget _sizeListView() {
     final children = [
@@ -114,6 +116,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                   height: Dimensions.height10,
                 ),
                 _toppingsPriceFields[i],
+                SizedBox(
+                  height: Dimensions.height10,
+                ),
+                _toppingsExtraPriceFields[i],
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         primary: Theme.of(context).primaryColor),
@@ -121,8 +127,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       setState(() {
                         _toppingsNameFields.removeAt(i);
                         _toppingsPriceFields.removeAt(i);
+                        _toppingsExtraPriceFields.removeAt(i);
                         _toppingsNameControllers.removeAt(i);
                         _toppingsPriceControllers.removeAt(i);
+                        _toppingsExtraPriceControllers.removeAt(i);
                       });
                     },
                     child: SmallText(text: "Cancel"))
@@ -171,16 +179,22 @@ class _AddProductScreenState extends State<AddProductScreen> {
       title: Icon(Icons.add),
       onTap: () {
         final name = TextEditingController();
-        final tel = TextEditingController();
+        final regularPrice = TextEditingController();
+        final extraPrice = TextEditingController();
 
         final nameField = _generateTextField(name, "Topping");
-        final telField = _generateTextField(tel, "Price");
+        final regularPriceField =
+            _generateTextField(regularPrice, "Price ( Regular )");
+        final extraPriceField =
+            _generateTextField(extraPrice, "Price ( Extra )");
 
         setState(() {
           _toppingsNameControllers.add(name);
-          _toppingsPriceControllers.add(tel);
+          _toppingsPriceControllers.add(regularPrice);
+          _toppingsExtraPriceControllers.add(extraPrice);
           _toppingsNameFields.add(nameField);
-          _toppingsPriceFields.add(telField);
+          _toppingsPriceFields.add(regularPriceField);
+          _toppingsExtraPriceFields.add(extraPriceField);
         });
       },
     );
@@ -238,8 +252,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                   (isSizeSelectionEnabled == false &&
                                       _nameControllers.isEmpty)) {
                                 if ((isToppingsSelectionEnabled == true &&
-                                    _toppingsNameControllers.isNotEmpty) || (isToppingsSelectionEnabled == false &&
-                                    _toppingsNameControllers.isEmpty)) {
+                                        _toppingsNameControllers.isNotEmpty) ||
+                                    (isToppingsSelectionEnabled == false &&
+                                        _toppingsNameControllers.isEmpty)) {
                                   if (_image != null) {
                                     EasyLoading.show(status: 'Saving..');
                                     _provider
@@ -276,9 +291,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                               "name":
                                                   _toppingsNameControllers[i]
                                                       .text,
-                                              "price": double.parse(
-                                                  _toppingsPriceControllers[i]
-                                                      .text)
+                                              "price": {
+                                                "regular": double.parse(
+                                                    _toppingsPriceControllers[i]
+                                                        .text),
+                                                'extra': double.parse(
+                                                    _toppingsExtraPriceControllers[
+                                                            i]
+                                                        .text)
+                                              }
                                             });
                                           }
                                         }
@@ -309,6 +330,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
                                           _priceControllers.clear();
                                           _toppingsNameControllers.clear();
                                           _toppingsPriceControllers.clear();
+                                          _toppingsExtraPriceControllers
+                                              .clear();
                                         });
                                       } else {
                                         _provider.alertDialog(

@@ -55,9 +55,14 @@ class FirebaseServices {
     return doc;
   }
 
-  Future<void> selectDeliveryPartners(orderId, location, name, phone) {
+  Future<void> selectDeliveryPartners(orderId, location, name, phone, email) {
     var result = order.doc(orderId).update({
-      'deliveryPartner': {'name': name, 'phone': phone, 'location': location}
+      'deliveryPartner': {
+        'name': name,
+        'phone': phone,
+        'location': location,
+        'email': email
+      }
     });
     return result;
   }

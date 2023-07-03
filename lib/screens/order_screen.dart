@@ -24,13 +24,13 @@ class OrderScreen extends StatefulWidget {
 }
 
 class _OrderScreenState extends State<OrderScreen> {
-  int tag = 1;
+  int tag = 0;
 
   List<String> options = [
     'All Orders',
     'Ordered',
     'Accepted',
-    'Picked up',
+    'Picked Up',
     'On the way',
     'Delivered'
   ];
@@ -56,12 +56,12 @@ class _OrderScreenState extends State<OrderScreen> {
               onChanged: (val) {
                 if (val == 0) {
                   setState(() {
-                    _orderProvider.status = null;
+                    _orderProvider.filterOrder(null);
                   });
                 }
                 setState(() {
                   tag = val;
-                  _orderProvider.status = options[val];
+                  _orderProvider.filterOrder(options[val]);
                 });
               },
               choiceItems: C2Choice.listFrom<int, String>(

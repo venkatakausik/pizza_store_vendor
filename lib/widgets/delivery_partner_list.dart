@@ -102,12 +102,14 @@ class _DeliveryPartnerListState extends State<DeliveryPartnerList> {
                                           widget.document.id,
                                           document['location'],
                                           document['name'],
-                                          document['mobile'])
+                                          document['mobile'],
+                                          document['email'])
                                       .then((value) {
                                     _notificationServices.sendPushMessage(
-                                        document['deviceToken'],
-                                        "New order assigned",
-                                        "Tap here to know more");
+                                      document['deviceToken'],
+                                      "Tap here to know more",
+                                      "New order assigned",
+                                    );
                                     EasyLoading.showSuccess(
                                         "Delivery partner assigned");
                                     Navigator.pop(context);

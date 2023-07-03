@@ -49,6 +49,9 @@ class _EditViewProductState extends State<EditViewProduct> {
   List<TextEditingController> _toppingsPriceControllers = [];
   List<TextFormField> _toppingsPriceFields = [];
 
+  List<TextEditingController> _toppingsExtraPriceControllers = [];
+  List<TextFormField> _toppingsExtraPriceFields = [];
+
   bool isSizeSelectionEnabled = false;
   bool isToppingsSelectionEnabled = false;
 
@@ -124,6 +127,10 @@ class _EditViewProductState extends State<EditViewProduct> {
                   height: Dimensions.height10,
                 ),
                 _toppingsPriceFields[i],
+                SizedBox(
+                  height: Dimensions.height10,
+                ),
+                _toppingsExtraPriceFields[i],
                 ElevatedButton(
                     style: ElevatedButton.styleFrom(
                         primary: Theme.of(context).primaryColor),
@@ -131,8 +138,10 @@ class _EditViewProductState extends State<EditViewProduct> {
                       setState(() {
                         _toppingsNameFields.removeAt(i);
                         _toppingsPriceFields.removeAt(i);
+                        _toppingsExtraPriceFields.removeAt(i);
                         _toppingsNameControllers.removeAt(i);
                         _toppingsPriceControllers.removeAt(i);
+                        _toppingsExtraPriceControllers.removeAt(i);
                       });
                     },
                     child: SmallText(
@@ -179,9 +188,10 @@ class _EditViewProductState extends State<EditViewProduct> {
     );
   }
 
-  generateToppingsTile(name, price) {
+  generateToppingsTile(name, price, extraPrice) {
     final nameController = TextEditingController();
     final priceController = TextEditingController();
+    final extraPriceController = TextEditingController();
 
     if (name != null) {
       nameController.text = name;
@@ -189,6 +199,10 @@ class _EditViewProductState extends State<EditViewProduct> {
 
     if (price != null) {
       priceController.text = price.toString();
+    }
+
+    if (extraPrice != null) {
+      extraPriceController.text = price.toString();
     }
 
     final nameField = _generateTextField(nameController, "Topping");
@@ -231,14 +245,21 @@ class _EditViewProductState extends State<EditViewProduct> {
       onTap: () {
         final nameController = TextEditingController();
         final priceController = TextEditingController();
+        final extraPriceController = TextEditingController();
+
         final nameField = _generateTextField(nameController, "Topping");
-        final telField = _generateTextField(priceController, "Price");
+        final regularPriceField =
+            _generateTextField(priceController, "Price ( Regular )");
+        final extraPriceField =
+            _generateTextField(extraPriceController, "Price ( Extra )");
 
         setState(() {
           _toppingsNameControllers.add(nameController);
           _toppingsPriceControllers.add(priceController);
+          _toppingsExtraPriceControllers.add(extraPriceController);
           _toppingsNameFields.add(nameField);
-          _toppingsPriceFields.add(telField);
+          _toppingsPriceFields.add(regularPriceField);
+          _toppingsExtraPriceFields.add(extraPriceField);
         });
       },
     );
@@ -305,8 +326,10 @@ class _EditViewProductState extends State<EditViewProduct> {
               (document['toppings'] as List).isNotEmpty) {
             isToppingsSelectionEnabled = true;
             for (int i = 0; i < (document['toppings'] as List).length; i++) {
-              generateToppingsTile(document['toppings'][i]['name'],
-                  document['toppings'][i]['price']);
+              generateToppingsTile(
+                  document['toppings'][i]['name'],
+                  document['toppings'][i]['price']['regular'],
+                  document['toppings'][i]['price']['extra']);
             }
           }
           categoryImage = document['category']['categoryImage'];
@@ -385,8 +408,12 @@ class _EditViewProductState extends State<EditViewProduct> {
                                 i++) {
                               toppingsPrice.add({
                                 "name": _toppingsNameControllers[i].text,
-                                "price": double.parse(
-                                    _toppingsPriceControllers[i].text)
+                                "price": {
+                                  "regular": double.parse(
+                                      _toppingsPriceControllers[i].text),
+                                  'extra': double.parse(
+                                      _toppingsExtraPriceControllers[i].text)
+                                }
                               });
                             }
                           }

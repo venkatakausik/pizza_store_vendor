@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:pizza_store_vendor/services/firebase_services.dart';
 import 'package:pizza_store_vendor/services/order_services.dart';
@@ -42,16 +43,16 @@ class _OrderSummaryCardState extends State<OrderSummaryCard> {
                             .updateOrderStatus(documentId, status)
                             .then((value) {
                             _notificationServices.sendPushMessage(
-                                _customer['deviceToken'],
-                                "Your order is $status",
-                                "Tap here to know more");
+                                _customer!['deviceToken'],
+                                "Tap here to know more",
+                                "Your order is $status");
                             EasyLoading.showSuccess("Updated successfully");
                           })
                         : _orderServices
                             .updateOrderStatus(documentId, status)
                             .then((value) {
                             _notificationServices.sendPushMessage(
-                                _customer['deviceToken'],
+                                _customer!['deviceToken'],
                                 "Your order is $status",
                                 "Tap here to know more");
                             EasyLoading.showSuccess("Updated successfully");
@@ -238,7 +239,7 @@ class _OrderSummaryCardState extends State<OrderSummaryCard> {
     );
   }
 
-  late DocumentSnapshot _customer;
+  DocumentSnapshot? _customer = null;
 
   @override
   void initState() {
@@ -300,7 +301,7 @@ class _OrderSummaryCardState extends State<OrderSummaryCard> {
                     "Amount : \$${widget.document['total'].toStringAsFixed(0)}"),
             subtitle: SmallText(
                 text:
-                    "On ${DateFormat.yMMMd().format(widget.document['timestamp'])}"),
+                    "On ${DateFormat.yMMMd().format((widget.document['timestamp'] as Timestamp).toDate())}"),
           ),
           _customer != null
               ? ListTile(
@@ -309,7 +310,7 @@ class _OrderSummaryCardState extends State<OrderSummaryCard> {
                     children: [
                       SmallText(text: "Customer : "),
                       SmallText(
-                        text: '${_customer['name']}',
+                        text: '${_customer!['name']}',
                         maxLines: 1,
                         overFlow: TextOverflow.ellipsis,
                         weight: FontWeight.bold,
@@ -317,12 +318,13 @@ class _OrderSummaryCardState extends State<OrderSummaryCard> {
                     ],
                   ),
                   subtitle: SmallText(
-                    text: _customer['address'],
+                    text: _customer!['address'],
                     maxLines: 1,
                   ),
                   trailing: InkWell(
                     onTap: () {
-                      _orderServices.launchCall('tel:${_customer['number']}');
+                      _orderServices.launchCall(
+                          Uri(scheme: 'tel', path: '${_customer!['number']}'));
                     },
                     child: Container(
                         decoration: BoxDecoration(
@@ -362,6 +364,7 @@ class _OrderSummaryCardState extends State<OrderSummaryCard> {
                             widget.document['products'][index]['productImage']),
                       ),
                       title: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           SmallText(
                               text: widget.document['products'][index]
@@ -370,24 +373,49 @@ class _OrderSummaryCardState extends State<OrderSummaryCard> {
                           if (widget.document['products'][index]['itemSize'] !=
                               null)
                             SmallText(
-                                text: widget.document['products'][index]
-                                    ['itemSize']),
-                          if ((widget.document['products'][index]['toppings']
-                                  as List)
-                              .isNotEmpty)
+                                text:
+                                    "Size : ${widget.document['products'][index]['itemSize']}"),
+                          if ((widget.document['products'][index]
+                                  as Map<String, dynamic>)
+                              .containsKey("toppings"))
                             Column(
-                              children: widget.document['products'][index]
-                                      ['toppings']
-                                  .map((context, topping) {
-                                return SmallText(text: topping['name']);
+                              children: (widget.document['products'][index]
+                                      ["toppings"] as List)
+                                  .map((topping) {
+                                return Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    SmallText(
+                                      text: topping["name"],
+                                      color: Colors.grey,
+                                    ),
+                                    SizedBox(
+                                      width: Dimensions.width5,
+                                    ),
+                                    SmallText(
+                                      text: (topping["type"] as String)
+                                          .capitalize!,
+                                      color: Colors.grey,
+                                    ),
+                                    SizedBox(
+                                      width: Dimensions.width5,
+                                    ),
+                                    SmallText(
+                                      text: "\$${topping["price"]}",
+                                      weight: FontWeight.bold,
+                                      color: Colors.grey,
+                                    ),
+                                  ],
+                                );
                               }).toList(),
-                            )
+                            ),
                         ],
                       ),
                       subtitle: SmallText(
                           color: Colors.grey,
                           text:
-                              '${widget.document['products'][index]['qty']} x \$${widget.document['products'][index]['price'].toStringAsFixed(0)} = \$${widget.document['products'][index]['total'].toStringAsFixed(0)}'),
+                              '${widget.document['products'][index]['qty']} x \$${widget.document['products'][index]['price'].toStringAsFixed(0)}'),
                     );
                   }),
             ],
